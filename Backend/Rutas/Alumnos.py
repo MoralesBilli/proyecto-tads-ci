@@ -1,7 +1,7 @@
 from Extensiones import db
-from Modelos.Modelos import Alumnos,FactoresDeRiesgo,FactoresPorAlumno
-from flask import jsonify, Blueprint
-from sqlalchemy.orm import joinedload
+from Modelos.Modelos import Alumnos
+from flask import jsonify, Blueprint, request
+
 Alumnos_bp = Blueprint('alumnos',__name__)
 
 @Alumnos_bp.route('/api/alumnos',methods=['GET'])
@@ -22,9 +22,64 @@ def obtener_alumnos_factores():
         return jsonify(resultado)
     except Exception as e:
         return jsonify({'ERROR': f'Error al cargar los alumnos: {str(e)}'}), 500
+    
+
+@Alumnos_bp.route('/api/alumnos', methods=['POST'])
+def crear_alumno():
+    """
+    Crea un nuevo alumno en la base de datos.
+    Espera un JSON con los datos del alumno.
+    """
+    json_data = request.get_json()
+    if not json_data:
+        return jsonify({'ERROR': 'No se recibieron datos en la solicitud.'}), 400
+
+    # --- Validación de campos obligatorios ---
+    campos_obligatorios = ['no_control', 'nombre', 'apellido_paterno', 'genero', 'estado', 'semestre', 'id_carrera']
+    for campo in campos_obligatorios:
+        if campo not in json_data:
+            return jsonify({'ERROR': f'El campo "{campo}" es obligatorio.'}), 400
+
+    # --- Comprobar si el alumno ya existe ---
+    if Alumnos.query.get(json_data['no_control']):
+        return jsonify({'ERROR': f'El alumno con número de control {json_data["no_control"]} ya existe.'}), 409
+
+    try:
+        # --- Creación del nuevo alumno ---
+        nuevo_alumno = Alumnos(
+            no_control=json_data['no_control'],
+            nombre=json_data['nombre'],
+            apellido_paterno=json_data['apellido_paterno'],
+            apellido_materno=json_data.get('apellido_materno'),  # Opcional
+            genero=json_data['genero'],
+            estado=json_data['estado'],
+            semestre=json_data['semestre'],
+            id_carrera=json_data['id_carrera']
+        )
+
+        db.session.add(nuevo_alumno)
+        db.session.commit()
+
+        # --- Respuesta exitosa ---
+        return jsonify(nuevo_alumno.to_dict()), 201
+
+    except SQLAlchemyError as e:
+        db.session.rollback()
+        # --- Manejo de errores específicos de la base de datos ---
+        error_msg = str(e.__dict__.get('orig', 'Error de base de datos'))
+        if "violates foreign key constraint" in error_msg:
+            return jsonify({'ERROR': 'La carrera especificada (id_carrera) no existe.'}), 400
+        if "invalid input value for enum" in error_msg:
+            return jsonify({'ERROR': 'Valor no válido para "genero" o "estado".'}), 400
+            
+        return jsonify({'ERROR': f'Error al guardar en la base de datos: {error_msg}'}), 500
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'ERROR': f'Ocurrió un error inesperado: {str(e)}'}), 500
 
 
-
+#Endpoint para obtener un usuario en base a su numero de control 
 @Alumnos_bp.route('/api/alumno_detalle/<no_control>', methods=['GET'])
 def obtener_alumno_detalle(no_control):
     try:
