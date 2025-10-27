@@ -1,6 +1,7 @@
 from Extensiones import db
-from Modelos.Modelos import Alumnos
+from Modelos.Modelos import Alumnos, FactoresDeRiesgo, FactoresPorAlumno
 from flask import jsonify, Blueprint, request
+from sqlalchemy.exc import SQLAlchemyError
 
 Alumnos_bp = Blueprint('alumnos',__name__)
 
@@ -127,3 +128,46 @@ def obtener_alumno_detalle(no_control):
 
     except Exception as e:
         return jsonify({'ERROR': f'Error al cargar el alumno: {str(e)}'}), 500
+
+
+"""
+  una petición POST a /api/alumnos/21212056/factores con el siguiente JSON en el cuerpo:
+
+   1 {
+   2   "factores_de_riesgo": [1, 3]
+   3 }
+"""
+
+@Alumnos_bp.route('/api/alumnos/<no_control>/factores', methods=['POST'])
+def asignar_factores_riesgo(no_control):
+    """
+    Asigna factores de riesgo a un alumno existente.
+    """
+    json_data = request.get_json()
+    if not json_data or 'factores_de_riesgo' not in json_data:
+        return jsonify({'ERROR': 'Se requiere una lista de factores de riesgo.'}), 400
+
+    alumno = Alumnos.query.get(no_control)
+    if not alumno:
+        return jsonify({'ERROR': 'El alumno no existe.'}), 404
+
+    try:
+        # Limpiar factores de riesgo existentes
+        FactoresPorAlumno.query.filter_by(no_control_alumno=no_control).delete()
+
+        # Asignar nuevos factores
+        for id_factor in json_data['factores_de_riesgo']:
+            factor = FactoresDeRiesgo.query.get(id_factor)
+            if factor:
+                nuevo_link = FactoresPorAlumno(
+                    no_control_alumno=no_control,
+                    id_factor=id_factor
+                )
+                db.session.add(nuevo_link)
+
+        db.session.commit()
+        return jsonify(alumno.to_dict()), 200
+
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({'ERROR': f'Error al asignar factores: {str(e)}'}), 500
