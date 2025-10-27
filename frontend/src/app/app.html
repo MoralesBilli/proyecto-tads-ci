@@ -1,0 +1,27 @@
+<div class="min-h-screen flex flex-col">
+  <header class="navbar bg-base-100 shadow-sm sticky top-0 z-10">
+    <div class="flex-1">
+      <a class="btn btn-ghost text-xl" routerLink="/">Gestor de Alumnos</a>
+    </div>
+    <div class="flex-none">
+      <ul class="menu menu-horizontal px-1">
+        @for (item of bottomNavigation(); track item.link) {
+          <li>
+            <a
+              [routerLink]="item.link"
+              routerLinkActive="menu-active"
+              [routerLinkActiveOptions]="{ exact: item.link === '/' }"
+            >
+              {{ item.label }}
+            </a>
+          </li>
+        }
+      </ul>
+    </div>
+  </header>
+  <main class="bg-base-200 flex-1 overflow-y-auto {{ layoutService.padding() ? 'p-4' : 'p-0' }}">
+		<router-outlet />
+	</main>
+</div>
+
+<app-toast-container></app-toast-container>

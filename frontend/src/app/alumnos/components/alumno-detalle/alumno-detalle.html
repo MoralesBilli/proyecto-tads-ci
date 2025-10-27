@@ -1,0 +1,105 @@
+@if (!detalle()) {
+  <div class="alert alert-soft">
+    <span>Selecciona un alumno para ver el detalle.</span>
+  </div>
+} @else {
+  <div class="card bg-base-100 shadow">
+    <div class="card-body grid gap-4">
+      <div class="flex flex-col gap-6 md:flex-row md:items-start">
+        <figure class="avatar">
+          <img
+            src="{{ detalle()!.fotoUrl ?? '' }}"
+            alt="Foto de {{ detalle()!.nombre }} {{ detalle()!.apellidoPaterno }}"
+            class="size-28 rounded-full border border-base-300 object-cover"
+          />
+        </figure>
+        <div class="flex-1 space-y-4">
+          <div>
+            <p class="text-sm font-semibold uppercase tracking-wide text-base-content/70">Numero de control</p>
+            <p class="text-2xl font-bold">{{ detalle()!.numeroDeControl }}</p>
+          </div>
+          <div>
+            <h2 class="text-3xl font-semibold">
+              {{ detalle()!.nombre }} {{ detalle()!.apellidoPaterno }}
+              @if (detalle()!.apellidoMaterno) {
+                <span>{{ detalle()!.apellidoMaterno }}</span>
+              }
+            </h2>
+            <div class="flex flex-wrap gap-2 mt-4">
+              <span class="badge badge-outline">{{ detalle()!.genero }}</span>
+              <span class="badge badge-outline">{{ detalle()!.estado }}</span>
+              <span class="badge badge-outline">Semestre {{ detalle()!.semestre }}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="stats stats-vertical sm:stats-horizontal bg-base-200 rounded-box border border-base-300">
+        <div class="stat">
+          <div class="stat-title">Promedio general</div>
+          <div class="stat-value text-2xl">{{ promedioCalificacionesTexto() }}</div>
+        </div>
+        <div class="stat">
+          <div class="stat-title">Total de faltas</div>
+          <div class="stat-value text-2xl">{{ totalFaltas() }}</div>
+        </div>
+      </div>
+      <div class="divider my-0"></div>
+      <dl class="grid gap-4 md:grid-cols-2">
+        <div>
+          <dt class="text-sm font-semibold uppercase tracking-wide text-base-content/70">Carrera</dt>
+          <dd class="text-base">{{ detalle()!.nombreCarrera }}</dd>
+        </div>
+        <div>
+          <dt class="text-sm font-semibold uppercase tracking-wide text-base-content/70">Modalidad</dt>
+          <dd class="text-base">{{ detalle()!.modalidadCarrera }}</dd>
+        </div>
+      </dl>
+      <div>
+        <h3 class="text-sm font-semibold uppercase tracking-wide text-base-content/70 mb-2">Factores de riesgo</h3>
+        @if (detalle()!.factoresDeRiesgo.length === 0) {
+          <span class="badge badge-neutral">Sin factores de riesgo</span>
+        } @else {
+          <div class="flex flex-wrap gap-2">
+            @for (factor of detalle()!.factoresDeRiesgo; track factor) {
+              <span class="badge badge-warning">{{ factor }}</span>
+            }
+          </div>
+        }
+      </div>
+      <div class="divider my-0"></div>
+      <div>
+        <h3 class="text-lg font-semibold mb-2">Inscripciones recientes</h3>
+        <div class="overflow-x-auto">
+          <table class="table">
+            <thead>
+              <tr class="text-xs uppercase tracking-wide text-base-content/70">
+                <th>Grupo</th>
+                <th>Materia</th>
+                <th>Serie</th>
+                <th>Calificaciones</th>
+              </tr>
+            </thead>
+            <tbody>
+              @for (inscripcion of inscripciones(); track inscripcion.grupo) {
+                <tr>
+                  <td class="font-medium">{{ inscripcion.grupo }}</td>
+                  <td>{{ inscripcion.nombreMateria }}</td>
+                  <td>{{ inscripcion.serieMateria }}</td>
+                  <td>
+                    <div class="flex flex-wrap gap-1">
+                      @for (unidad of inscripcion.calificaciones; track unidad.unidad) {
+                        <span class="badge badge-sm badge-outline">
+                          U{{ unidad.unidad }}: {{ unidad.calificacion }} ({{ unidad.faltas }}F)
+                        </span>
+                      }
+                    </div>
+                  </td>
+                </tr>
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+}

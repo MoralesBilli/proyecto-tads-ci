@@ -1,0 +1,14 @@
+<section class="grid gap-4 grid-cols-12">
+	<article class="col-span-4">
+		<app-alumnos-list
+      [alumnos]="alumnos()"
+      [alumnoSeleccionado]="alumnoSeleccionado()"
+      (alumnoSeleccionadoChange)="handleAlumnoSeleccionadoChange($event)"
+    />
+	</article>
+	<article class="col-span-8">
+		<app-alumno-detalle [detalle]="alumnoDetalle()"></app-alumno-detalle>
+	</article>
+</section>
+
+<app-alumnos-fab></app-alumnos-fab>
