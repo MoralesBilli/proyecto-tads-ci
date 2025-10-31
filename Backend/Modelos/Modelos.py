@@ -4,6 +4,7 @@ from Extensiones import db
 modalidad_enum = db.Enum('PRESENCIAL', 'SEMIPRESENCIAL', name='modalidad')
 genero_enum = db.Enum('HOMBRE', 'MUJER', name='genero')
 estado_alumno_enum = db.Enum('VIGENTE', 'EGRESADO', 'BAJA_TEMPORAL', 'BAJA_DEFINITIVA', name='estado_alumno')
+semestre = db.Enum('1','2','3','4','5','6','7','8','9','10','11','12', name='semestres')
 
 # --- Modelo Carreras ---
 
@@ -30,7 +31,7 @@ class Alumnos(db.Model):
     apellido_materno = db.Column(db.String(64))
     genero = db.Column(genero_enum, nullable=False) 
     estado = db.Column(estado_alumno_enum, nullable=False)
-    semestre = db.Column(db.Integer, nullable=False)
+    semestre = db.Column(semestre, nullable=False)
     
     id_carrera = db.Column(db.Integer, db.ForeignKey('carreras.id'), nullable=False)
 
@@ -156,9 +157,10 @@ class Calificaciones(db.Model):
     calificacion = db.Column(db.Integer, nullable=False)
     faltas = db.Column(db.Integer, nullable=False)
     id_inscripcion = db.Column(db.Integer, db.ForeignKey('inscripciones.id'), nullable=False)
-
+    id_materia = db.Column(db.Integer, db.ForeignKey('materias.id'), nullable=False)
     # Relación
     inscripcion = db.relationship('Inscripciones', backref='calificaciones')
+    materia =db.relationship('Materias', backref='calificaciones')
     
     # --- AÑADIDO ---
     # Método 'to_dict' faltante
@@ -189,3 +191,18 @@ class MateriasPorCarrera(db.Model):
             'nombre_materia': self.materia.nombre if self.materia else None,
             'nombre_carrera': self.carrera.nombre if self.carrera else None
         }
+    
+class Auditrail(db.Model):
+        __tablename__='audit_trail'
+        id = db.Column(db.Integer, primary_key=True, nullable=False)
+        origin = db.Column(db.Text, nullable=False)
+        accion = db.Column(db.Text,nullable=False)
+        clave_docente = db.Column(db.Integer, nullable = False)
+        created_at = db.Column(db.Date, nullable=False)
+
+        def to_dict(self):
+            return {
+                'id':self.id,
+                'accion':self.accion,
+                'clave_docente':self.clave_docente
+            }

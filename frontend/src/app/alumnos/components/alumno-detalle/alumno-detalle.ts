@@ -1,5 +1,6 @@
 import { Component, computed, input } from '@angular/core';
 import { AlumnoDetalle as AlumnoDetalleModel } from '../../models/alumnoDetalleSchema';
+import { getProfilePhoto } from '../../../core/utils/photoUtils';
 
 @Component({
   selector: 'app-alumno-detalle',
@@ -33,4 +34,10 @@ export class AlumnoDetalle {
       return sum + inscripcion.calificaciones.reduce((faltas, unidad) => faltas + unidad.faltas, 0);
     }, 0);
   });
+
+  protected readonly photoUrl = computed(() => {
+    const detalle = this.detalle();
+    if (!detalle) return '';
+    return getProfilePhoto(detalle.numeroDeControl);
+  })
 }

@@ -62,16 +62,16 @@ def obtener_datos_dispersion():
 def obtener_datos_control():
     try:
         resultados = (
-            db.session.query(Calificaciones.Unidad,
-                             func.avg(Calificaciones.calificacion).label('calificacionPromedio'),
-                             func.avg(Calificaciones.faltas).label('faaltasPromedio')
+            db.session.query(Calificaciones.unidad,
+                             func.avg(Calificaciones.calificacion).label('calificacion_promedio'),
+                             func.avg(Calificaciones.faltas).label('faltas_promedio')
                              ).group_by(Calificaciones.unidad).order_by(Calificaciones.unidad).all()
                              
         )
         respuesta= [{
             'unidad':r.unidad,
-            'calificacionPromedio':round(r.calificacion_promedio, 2),
-            'faltaspromedio': round(r.faltas_promedio, 2)
+            'calificacionPromedio':float(round(r.calificacion_promedio, 2)),
+            'faltasPromedio': float(round(r.faltas_promedio, 2))
 
         } for r in resultados]
 

@@ -1,8 +1,9 @@
 from Extensiones import db
 from flask import Blueprint, jsonify,request
 from Funciones.ImportarExcel import importar_grupos,importar_calificaciones
-from Modelos.Modelos import Grupos, Carreras
+from Modelos.Modelos import Grupos, Carreras,Materias
 import os
+from Funciones.Registrar_moviminto import registrar_audi
 
 Import_export_bp = Blueprint('Import_export',__name__)
 
@@ -38,12 +39,15 @@ def importar_Excel_grupos():
 
         procesamiento = importar_grupos(ruta,carreras_nombres,grupos_nombres)
        
-
+        print(procesamiento)
         os.remove(ruta)
 
         if procesamiento.startswith("No se pudo importar") or "Error" in procesamiento:
             return jsonify({'error': procesamiento}), 400
-        return jsonify({'mensaje': 'Archivo procesado correctamente', 'resultado': procesamiento})
+        
+        registrar_audi('Alumnos','Importar grupo',212420)
+
+        return jsonify({'message': 'Archivo procesado correctamente', 'resultado': procesamiento}),200
     except Exception  as e:
         return jsonify({'error': f'Error al importar el archivo {str(e)}'}),400
 
@@ -53,7 +57,10 @@ def importar_Excel_Calificaciones():
     try:
         UPLOAD_FOLDER = 'calificacion'
         os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-
+        grupos = Grupos.query.all()
+        materias = Materias.query.all()
+        materias_nombres = [materia.nombre for materia in materias]
+        grupos_nombres = [grupo.grupo for grupo in grupos]
         #validaciones 
         if 'archivo' not in request.files:
             return jsonify({'error': 'No fue enviaddo un archivo'}),400
@@ -70,10 +77,15 @@ def importar_Excel_Calificaciones():
         ruta = os.path.join(UPLOAD_FOLDER, archivo.filename)
         archivo.save(ruta)
 
-        procesamiento = importar_calificaciones(ruta)
+        procesamiento =  importar_calificaciones(ruta,grupos_nombres,materias_nombres)
        
 
         os.remove(ruta)
+
+        if procesamiento.startswith("No se pudo importar") or "Error" in procesamiento:
+            return jsonify({'error': procesamiento}), 400
+        
+        registrar_audi('Alumnos','Importar grupo',212420)
 
         return jsonify({'mensaje':'Archivo subido', 'resultado' : procesamiento})
     except Exception  as e:

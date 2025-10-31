@@ -1,6 +1,7 @@
 import { Component, computed, input, output } from '@angular/core';
 import { Alumno } from '../../models/alumnoSchema';
 import { toSortedDesc } from '../../../core/utils/arrayUtils';
+import { getProfilePhoto } from '../../../core/utils/photoUtils';
 
 const formatter = new Intl.ListFormat('es', { style: 'long', type: 'conjunction' });
 
@@ -32,5 +33,9 @@ export class AlumnosList {
     if (alumno.factoresDeRiesgo.length === 0) return 'badge-neutral'
     if (alumno.factoresDeRiesgo.length < 3) return 'badge-warning'
     return 'badge-error'
+  }
+
+  protected getPhoto(alumno: Alumno): string {
+    return getProfilePhoto(alumno.numeroDeControl)
   }
 }

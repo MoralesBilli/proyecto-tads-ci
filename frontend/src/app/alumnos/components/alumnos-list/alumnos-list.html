@@ -12,7 +12,7 @@
             class="list-row cursor-pointer rounded-t-none {{ !last ? 'rounded-b-none' : '' }} {{ alumno.numeroDeControl === alumnoSeleccionado()?.numeroDeControl ? 'bg-base-200 hover:bg-base-300' : 'hover:bg-base-200' }}"
             (click)="handleAlumnoSeleccionadoChange(alumno)"
           >
-            <div><img class="size-10 rounded-box" src="https://i.pravatar.cc/500?u={{ alumno.numeroDeControl }}" /></div>
+            <div><img class="size-10 rounded-box" [src]="getPhoto(alumno)" /></div>
             <div>
               <div>{{ alumno.nombre}} {{ alumno.apellidoPaterno }} {{ alumno.apellidoMaterno }}</div>
               <div class="text-xs uppercase font-semibold opacity-60">{{ alumno.numeroDeControl }}</div>

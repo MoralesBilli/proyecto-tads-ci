@@ -1,1 +1,40 @@
-<p>calidad-page works!</p>
+<section class="grid gap-4 grid-cols-12">
+	<article class="col-span-4">
+		<app-tipos-de-grafica [(graficaSeleccionada)]="graficaSeleccionada" />
+	</article>
+	<article class="col-span-8">
+    @switch (graficaSeleccionada()) {
+      @case ('histograma') {
+        <app-histograma
+          [data]="datosHistograma.value()"
+          [getX]="getHistogramaX"
+          [getY]="getHistogramaY"
+        />
+      }
+      @case ('pareto') {
+        <app-pareto
+          [data]="datosPareto.value()"
+          [getX]="getParetoX"
+          [getY]="getParetoY"
+        />
+      }
+      @case ('dispersion') {
+        <app-dispersion
+          [data]="datosDispersion.value()"
+          [getX]="getDispersionX"
+          [getY]="getDispersionY"
+        />
+      }
+      @case ('control') {
+        <app-control
+          [data]="datosControl.value()"
+          [getX]="getControlX"
+          [getY]="getControlY"
+        />
+      }
+      @default {
+        Selecciona un tipo de gráfica
+      }
+    }
+	</article>
+</section>
