@@ -1,8 +1,8 @@
 import pandas as pd
 from Extensiones import db
-from Modelos.Modelos import Alumnos, Carreras, Calificaciones, Inscripciones, Grupos,Materias
+from Modelos.Modelos import Alumnos, Carreras, Calificaciones, Inscripciones, Grupos,Materias,Docente
 import re
-
+from Funciones.Agregar_docente import crear_docente
 #Lectura del archivo excel
 def importar_calificaciones(archivo,grupos,materias):
     
@@ -68,6 +68,67 @@ def importar_calificaciones(archivo,grupos,materias):
     resultado = guardar_calificaciones(contenido)
     return resultado
 
+def importar_docentes(archivo):
+    contenido = {}
+    patron_nombre = r'^[A-Za-zÁÉÍÓÚÜÑáéíóúüñ\s]+$'
+    columnas_numerica = ['Telefono', 'Clave_Docente']
+    patron_correo = r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$'
+    try:
+        with pd.ExcelFile(archivo) as ArchivoEx:
+            hojas = ArchivoEx.sheet_names
+
+            for hoja in hojas:
+                df =ArchivoEx.parse(hoja)
+                df.columns = df.columns.str.strip()
+                
+                #Detecta valores nulos
+                if df.isnull().values.any():
+                    return "No se pudo importar, datos nulos"
+                
+                #Detecta valores vacios
+                if (df.astype(str).apply(lambda x: x.str.strip() == "")).values.any():
+                    return "No se pudo importar, datos vacíos "
+               
+                if "Clave_Docente" in df.columns:
+                    if (df['Clave_Docente'].astype(str).str.len() > 10).any():
+                        return "No se pudo importar, clave docente inválida"
+                    
+                if 'Correo' in df.columns:
+                    if ~df['Correo'].astype(str).str.match(patron_correo).all():
+                        return "No se pudo importar, correo con formato incorrecto"
+                    
+                    if df.duplicated(subset=['Correo']).any():
+                         return "No se pudo importar, datos duplicados"   
+
+                for columna in columnas_numerica:
+                    if columna in df.columns:
+                        no_numericos = df[~df[columna].astype(str).str.isnumeric()]
+                        if not no_numericos.empty:
+                            return f"No se pudo importar, datos no numéricos en {columna}"
+                
+                for col in ["Nombre", "Apellido_Paterno", "Apellido_Materno"]:
+                        if col in df.columns:
+                            if ~df[col].astype(str).str.match(patron_nombre).all():
+                                return f"No se pudo importar: hay valores inválidos en '{col}'"
+                            
+                limites = {
+                        'Nombre': 40,
+                        'Apellido_Paterno': 40,
+                        'Apellido_Materno': 40
+                    }
+                
+                for campo, max_len in limites.items():
+                        if campo in df.columns:
+                            if df[campo].astype(str).apply(len).gt(max_len).any():
+                                return f"No se pudo importar: hay valores demasiado largos en '{campo}' (máx. {max_len} caracteres)"
+                
+                contenido[hoja] = df
+
+    except Exception as e:
+         return f'Error al importar el archivo: {str(e)}'
+    
+    resultado = guardad_docentes(contenido)
+    return resultado
 
 def importar_grupos(archivo,carreras,grupos):
     
@@ -162,70 +223,76 @@ def importar_grupos(archivo,carreras,grupos):
     
 def guardar_calificaciones(datos):
     try:
-        if isinstance(datos,dict):
-            grupos = {grupo.grupo: grupo.id for grupo in Grupos.query.all()}
-            materias = {materia.nombre: materia.id for materia in Materias.query.all()}
+        if not isinstance(datos, dict):
+            return datos
 
-            for hoja, df in datos.items():
-                nombre_grupo = df["Grupo"].iloc[0]
-                id_grupo = grupos.get(nombre_grupo)
-                nombre_materia = df["Materia"].iloc[0]
-                id_materia=materias.get(nombre_materia)
+        
+        grupos = {g.grupo: g.id for g in Grupos.query.all()}
+        materias = {m.nombre: m.id for m in Materias.query.all()}
 
-                if id_grupo is None:
-                    return f"Grupo '{nombre_grupo}' no encontrado en la base de datos"
-                
-                if id_materia is None:
-                    return f"Grupo '{nombre_materia}' no encontrado en la base de datos"
-            
+        total_registros = 0
+
+        for hoja, df in datos.items():
+            nombre_grupo = df["Grupo"].iloc[0]
+            nombre_materia = df["Materia"].iloc[0]
+
+            id_grupo = grupos.get(nombre_grupo)
+            id_materia = materias.get(nombre_materia)
+
+            if id_grupo is None:
+                return f"Grupo '{nombre_grupo}' no encontrado en la base de datos"
+            if id_materia is None:
+                return f"Materia '{nombre_materia}' no encontrada en la base de datos"
+
+            # Obtener inscripciones del grupo
             inscripciones = Inscripciones.query.filter_by(id_grupo=id_grupo).all()
-            inscripciones_dict = {inc.no_control_alumno: inc.id for inc in inscripciones}
+            inscripciones_dict = {i.no_control_alumno: i.id for i in inscripciones}
 
+            # Obtener calificaciones existentes del grupo/materia
+            calificaciones_existentes = Calificaciones.query.filter(
+                Calificaciones.id_inscripcion.in_(inscripciones_dict.values()),
+                Calificaciones.materia == nombre_materia
+            ).all()
+            calificaciones_dict = {
+                (c.id_inscripcion, c.unidad): c for c in calificaciones_existentes
+            }
+
+            # Procesar cada fila del DataFrame
             for _, fila in df.iterrows():
                 no_control = fila["No_Control"]
-                unidad = int(fila["Unidad"])
-                materia = fila["Materia"]
                 id_inscripcion = inscripciones_dict.get(no_control)
-
                 if id_inscripcion is None:
-                    continue 
-                
-                calificacion_existente = Calificaciones.query.filter_by(
-                    id_inscripcion=id_inscripcion,
-                    unidad=unidad,
-                    materia = materia
-                ).first()
+                    continue  # alumno no inscrito en este grupo
 
-                if calificacion_existente:
-                    # Actualizar campos
-                    calificacion_existente.calificacion = fila["Calificacion"]
-                    calificacion_existente.no_faltas = fila["No_Faltas"]
-                    
+                unidad = int(fila["Unidad"])
+                key = (id_inscripcion, unidad)
+                calificacion = calificaciones_dict.get(key)
+
+                if calificacion:
+                    calificacion.calificacion = fila["Calificacion"]
+                    calificacion.no_faltas = fila["No_Faltas"]
                 else:
-                    # Crear nueva calificación
-                    nueva_calificacion = Calificaciones(
+                    nueva = Calificaciones(
                         id_inscripcion=id_inscripcion,
                         unidad=unidad,
                         calificacion=fila["Calificacion"],
                         no_faltas=fila["No_Faltas"],
-                        materia = materia
-                        
+                        materia=nombre_materia
                     )
-                    db.session.add(nueva_calificacion)
+                    db.session.add(nueva)
+                    total_registros += 1
 
+        db.session.commit()
+        return f"Calificaciones guardadas correctamente ({total_registros} nuevas)"
 
-            db.session.commit()
-            print('guardadas')
-            return "Calificaciones guardadas correctamente"
-
-        else:
-            return datos
     except Exception as e:
         db.session.rollback()
-        return f'No se pudo importar, error al guardar las calificaciones {str(e)}'
+        return f"No se pudo importar, error al guardar las calificaciones: {str(e)}"
+
     
 
 def Guardar_Datos_grupos(datos):
+
     try:
         if isinstance(datos,dict):
             
@@ -286,6 +353,35 @@ def Guardar_Datos_grupos(datos):
             
         else:
             return datos
+    except Exception as e:
+        db.session.rollback()
+        return f'No se pudo importar, error al guardar los datos {str(e)}'
+    
+def guardad_docentes(datos):
+    try:
+        if isinstance(datos,dict):
+            claves_existentes = {docente.clave_docente for docente in Docente.query.all()}
+            for hoja, df in  datos.items():
+               
+                for _, fila in df.iterrows():
+                    clave = fila["Clave_Docente"]
+                    nombre = fila["Nombre"]
+                    apellidopa = fila["Apellido_Paterno"]
+                    apellidoma = fila["Apellido_Materno"]
+                    telefono = fila["Telefono"]
+                    correo = fila["Correo"]
+
+                    if clave in claves_existentes:
+                        continue
+                    exito, mensaje = crear_docente(clave, nombre, apellidopa, apellidoma, telefono, correo)
+                    if not exito:
+                        return f'Error al crar los docentes {str(mensaje)}' 
+                
+
+            return "Docentes registrados"
+
+
+                    
     except Exception as e:
         db.session.rollback()
         return f'No se pudo importar, error al guardar los datos {str(e)}'

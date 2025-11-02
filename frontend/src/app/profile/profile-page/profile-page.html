@@ -1,0 +1,90 @@
+<section class="max-w-3xl mx-auto px-4 py-6">
+	<div class="card bg-base-100 shadow-xl">
+		<div class="card-body">
+			<div class="flex items-start justify-between gap-4">
+				<h2 class="card-title">Perfil</h2>
+				<button class="btn btn-error" type="button" (click)="logout()">Cerrar sesión</button>
+			</div>
+
+			<div class="flex flex-col gap-6 md:flex-row md:items-start">
+				<figure class="avatar">
+					<img
+						[src]="photoUrl()"
+						alt="Foto de perfil"
+						class="size-28 rounded-full border border-base-300 object-cover"
+					/>
+				</figure>
+				<div class="grid grid-cols-1 md:grid-cols-3 gap-4 flex-1">
+					<div>
+						<div class="text-sm opacity-70">ID usuario</div>
+						<div class="font-medium">{{ decoded()?.id ?? '—' }}</div>
+					</div>
+					<div>
+						<div class="text-sm opacity-70">ID docente</div>
+						<div class="font-medium">{{ decoded()?.doce ?? '—' }}</div>
+					</div>
+					<div>
+						<div class="text-sm opacity-70">Expira</div>
+						<div class="font-medium">{{ expMs ? (expMs | date:'short') : '—' }}</div>
+					</div>
+				</div>
+			</div>
+
+			<div class="divider"></div>
+
+			<h3 class="font-semibold">Cambiar contraseña</h3>
+			<form class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4" [formGroup]="form" (ngSubmit)="submit()">
+				<div class="form-control">
+					<label class="label"><span class="label-text">Contraseña actual <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+					<input type="password" class="input input-bordered" formControlName="contrasena_actual"
+								 [class.input-error]="form.controls.contrasena_actual.touched && form.controls.contrasena_actual.invalid" />
+					@if (form.controls.contrasena_actual.touched && form.controls.contrasena_actual.invalid) {
+						<label class="label"><span class="label-text-alt text-error">Requerido</span></label>
+					}
+				</div>
+
+						<div class="form-control">
+							<label class="label"><span class="label-text">Nueva contraseña <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+							<input type="password" class="input input-bordered" formControlName="nueva_contrasena"
+										 [class.input-error]="form.controls.nueva_contrasena.touched && form.controls.nueva_contrasena.invalid" />
+							@if (form.controls.nueva_contrasena.touched && form.controls.nueva_contrasena.invalid) {
+								<label class="label flex flex-col gap-0.5">
+									@if (form.controls.nueva_contrasena.errors?.['minlength']) {
+										<span class="label-text-alt text-error">Mínimo 8 caracteres</span>
+									}
+									@if (form.controls.nueva_contrasena.errors?.['uppercase']) {
+										<span class="label-text-alt text-error">Debe incluir al menos una letra mayúscula</span>
+									}
+									@if (form.controls.nueva_contrasena.errors?.['digit']) {
+										<span class="label-text-alt text-error">Debe incluir al menos un número</span>
+									}
+									@if (form.controls.nueva_contrasena.errors?.['required']) {
+										<span class="label-text-alt text-error">Requerido</span>
+									}
+								</label>
+							}
+						</div>
+
+						<div class="form-control">
+							<label class="label"><span class="label-text">Confirmar nueva contraseña <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+							<input type="password" class="input input-bordered" formControlName="confirmar"
+										 [class.input-error]="(form.controls.confirmar.touched && form.controls.confirmar.invalid) || (form.controls.confirmar.touched && form.errors?.['passwordMismatch'])" />
+							@if (form.controls.confirmar.touched && (form.controls.confirmar.invalid || form.errors?.['passwordMismatch'])) {
+								<label class="label">
+									@if (form.controls.confirmar.errors?.['required']) {
+										<span class="label-text-alt text-error">Requerido</span>
+									} @else if (form.errors?.['passwordMismatch']) {
+										<span class="label-text-alt text-error">Las contraseñas no coinciden</span>
+									}
+								</label>
+							}
+						</div>
+
+
+				<div class="col-span-1 md:col-span-2 lg:col-span-3">
+					<button class="btn btn-primary btn-block" type="submit" [disabled]="loading()">{{ loading() ? 'Guardando...' : 'Guardar cambios' }}</button>
+				</div>
+			</form>
+		</div>
+	</div>
+</section>

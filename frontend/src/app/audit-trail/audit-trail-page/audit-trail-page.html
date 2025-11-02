@@ -1,0 +1,44 @@
+<section class="max-w-5xl mx-auto px-4 py-6">
+  <div class="card bg-base-100 shadow-xl">
+    <div class="card-body">
+      <h2 class="card-title">Audit Trail</h2>
+
+      @if (emptyMessage()) {
+        <div class="alert alert-info">
+          <span>{{ emptyMessage() }}</span>
+        </div>
+      }
+
+      <div class="overflow-x-auto">
+        <table class="table">
+          <thead>
+            <tr class="text-xs uppercase tracking-wide text-base-content/70">
+              <th>ID</th>
+              <th>Acción</th>
+              <th>Clave Docente</th>
+              <th>Fecha</th>
+              <th>Origen</th>
+            </tr>
+          </thead>
+          <tbody>
+            @if (logs.value().length === 0) {
+              <tr>
+                <td colspan="5" class="text-center text-sm opacity-70">Sin registros</td>
+              </tr>
+            } @else {
+              @for (item of logs.value(); track item.id) {
+                <tr>
+                  <td class="font-medium">{{ item.id }}</td>
+                  <td>{{ item.accion }}</td>
+                  <td>{{ item.clave_docente }}</td>
+                  <td>{{ item.create_at | date: 'short' }}</td>
+                  <td>{{ item.origin }}</td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>

@@ -12,6 +12,7 @@ import { catchError, finalize, of, tap } from 'rxjs';
 export class AlumnosFab {
   private fileImportarAlumnos = viewChild.required<ElementRef<HTMLInputElement>>('fileImportarAlumnos');
   private fileImportarCalificaciones = viewChild.required<ElementRef<HTMLInputElement>>('fileImportarCalificaciones');
+  private fileImportarDocentes = viewChild.required<ElementRef<HTMLInputElement>>('fileImportarDocentes');
 
   private alumnosService = inject(AlumnosService);
   private toastService = inject(ToastService);
@@ -78,6 +79,31 @@ export class AlumnosFab {
       .subscribe()
     }
     else {
+      this.toastService.show('No se seleccionó ningún archivo', 'warning');
+    }
+  }
+
+  protected handleImportarDocentes() {
+    this.fileImportarDocentes().nativeElement.click();
+  }
+
+  protected handleDocentesImportados(event: Event) {
+    const files = this.fileImportarDocentes().nativeElement.files;
+    if (files && files.length > 0) {
+      this.alumnosService.importarDocentes(files[0]).pipe(
+        tap(() => {
+          this.toastService.show(`Docentes importados desde ${files[0].name}`, 'success');
+        }),
+        catchError((err) => {
+          this.toastService.show(err?.error?.error || 'Error al importar docentes', 'error');
+          return of(null);
+        }),
+        finalize(() => {
+          this.fileImportarDocentes().nativeElement.value = '';
+          // Si hay algún recurso relacionado con docentes para recargar, agregar aquí
+        })
+      ).subscribe();
+    } else {
       this.toastService.show('No se seleccionó ningún archivo', 'warning');
     }
   }

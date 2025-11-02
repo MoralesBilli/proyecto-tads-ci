@@ -50,4 +50,15 @@ export class AlumnosService {
       formData
     )
   }
+
+  importarDocentes(archivo: File) {
+    const formData = new FormData();
+    formData.append('archivo', archivo, archivo.name);
+
+    // Asunción: endpoint para importar docentes
+    return this.http.post(
+      `${this.apiUrl}/importar/docentes`,
+      formData
+    )
+  }
 }

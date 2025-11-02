@@ -1,0 +1,55 @@
+<div class="flex items-center justify-center bg-base-200 px-4">
+	<form class="card w-full max-w-sm shadow-xl bg-base-100" [formGroup]="form" (ngSubmit)="submit()">
+		<div class="card-body">
+			<h2 class="card-title justify-center">Iniciar sesión</h2>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Clave maestro <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input
+					type="number"
+					class="input input-bordered w-full"
+					formControlName="clave"
+					placeholder="Clave del maestro"
+					[class.input-error]="form.controls.clave.touched && form.controls.clave.invalid"
+				/>
+				@if (form.controls.clave.touched && form.controls.clave.invalid) {
+					<label class="label">
+						<span class="label-text-alt text-error">Requerido (solo números)</span>
+					</label>
+				}
+			</div>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Contraseña <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input
+					type="password"
+					class="input input-bordered w-full"
+					formControlName="password"
+					placeholder="Contraseña"
+					[class.input-error]="form.controls.password.touched && form.controls.password.invalid"
+				/>
+				@if (form.controls.password.touched && form.controls.password.invalid) {
+					<label class="label">
+						<span class="label-text-alt text-error">Requerido</span>
+					</label>
+				}
+			</div>
+
+			@if (error()) {
+				<div class="alert alert-error text-sm">
+					{{ error() }}
+				</div>
+			}
+
+			<button class="btn btn-primary btn-block mt-2" type="submit" [disabled]="loading()">
+				{{ loading() ? 'Ingresando...' : 'Entrar' }}
+			</button>
+
+			<div class="divider my-1"></div>
+			<p class="text-center text-sm">
+				¿No tienes una cuenta?
+				<a routerLink="/register" class="link link-primary">Registrarte</a>
+			</p>
+		</div>
+	</form>
+</div>

@@ -1,0 +1,74 @@
+<div class="flex items-center justify-center bg-base-200 px-4">
+	<form class="card w-full max-w-3xl shadow-xl bg-base-100" [formGroup]="form" (ngSubmit)="submit()">
+		<div class="card-body">
+		<h2 class="card-title justify-center">Crear cuenta</h2>
+
+		<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+			<div class="form-control">
+				<label class="label"><span class="label-text">Nombre <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input class="input input-bordered w-full" formControlName="nombre" placeholder="Nombre"
+					   [class.input-error]="form.controls.nombre.touched && form.controls.nombre.invalid" />
+				@if (form.controls.nombre.touched && form.controls.nombre.invalid) {
+					<label class="label"><span class="label-text-alt text-error">Requerido</span></label>
+				}
+			</div>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Apellido paterno <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input class="input input-bordered w-full" formControlName="apellidopa" placeholder="Apellido paterno"
+					   [class.input-error]="form.controls.apellidopa.touched && form.controls.apellidopa.invalid" />
+				@if (form.controls.apellidopa.touched && form.controls.apellidopa.invalid) {
+					<label class="label"><span class="label-text-alt text-error">Requerido</span></label>
+				}
+			</div>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Apellido materno <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input class="input input-bordered w-full" formControlName="apellidoma" placeholder="Apellido materno"
+					   [class.input-error]="form.controls.apellidoma.touched && form.controls.apellidoma.invalid" />
+				@if (form.controls.apellidoma.touched && form.controls.apellidoma.invalid) {
+					<label class="label"><span class="label-text-alt text-error">Requerido</span></label>
+				}
+			</div>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Teléfono <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input class="input input-bordered w-full" formControlName="telefono" placeholder="Teléfono"
+					   [class.input-error]="form.controls.telefono.touched && form.controls.telefono.invalid" />
+				@if (form.controls.telefono.touched && form.controls.telefono.invalid) {
+					<label class="label"><span class="label-text-alt text-error">Requerido o formato inválido</span></label>
+				}
+			</div>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Correo <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input class="input input-bordered w-full" formControlName="correo" placeholder="Correo"
+					   [class.input-error]="form.controls.correo.touched && form.controls.correo.invalid" />
+				@if (form.controls.correo.touched && form.controls.correo.invalid) {
+					<label class="label"><span class="label-text-alt text-error">Requerido o correo inválido</span></label>
+				}
+			</div>
+
+			<div class="form-control">
+				<label class="label"><span class="label-text">Clave (número) <span aria-hidden="true" class="text-error">*</span></span><span class="sr-only">(requerido)</span></label>
+				<input type="number" class="input input-bordered w-full" formControlName="clave" placeholder="Clave maestro"
+					   [class.input-error]="form.controls.clave.touched && form.controls.clave.invalid" />
+				@if (form.controls.clave.touched && form.controls.clave.invalid) {
+					<label class="label"><span class="label-text-alt text-error">Requerido (solo números)</span></label>
+				}
+			</div>
+		</div>
+
+			@if (error()) {
+				<div class="alert alert-error text-sm">{{ error() }}</div>
+			}
+
+		<button class="btn btn-primary btn-block mt-2" type="submit" [disabled]="loading()">{{ loading() ? 'Creando...' : 'Crear cuenta' }}</button>
+		<div class="divider my-1"></div>
+		<p class="text-center text-sm">
+			¿Ya tienes una cuenta?
+			<a routerLink="/login" class="link link-primary">Iniciar sesión</a>
+		</p>
+		</div>
+	</form>
+</div>
