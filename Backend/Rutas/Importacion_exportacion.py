@@ -6,8 +6,6 @@ import os
 from Funciones.Registrar_moviminto import registrar_audi
 from flask import send_file
 from Funciones.ExportarConstancia import generar_reporte_tutoria
-from flask import send_file
-from Funciones.ExportarConstancia import generar_reporte_tutoria
 
 Import_export_bp = Blueprint('Import_export',__name__)
 
@@ -94,6 +92,8 @@ def importar_Excel_Calificaciones():
         return jsonify({'mensaje':'Archivo subido', 'resultado' : procesamiento})
     except Exception  as e:
         return jsonify({'error': f'Error al importar el archivo {str(e)}'}),400
+
+#Exportacion reporte de alumno
 
 @Import_export_bp.route('/api/exportar/reporte_tutoria/<no_control>', methods=['GET'])
 def exportar_reporte_alumno(no_control):
