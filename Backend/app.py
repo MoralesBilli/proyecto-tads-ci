@@ -13,7 +13,7 @@ app.config['SQLALCHEMY_DATABASE_URI'] = os.getenv('DATABASE_URL')
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 
 db.init_app(app)
-
+app.secret_key = os.getenv('SECRET_KEY')
 # Configure CORS
 # Set CORS_ORIGINS in .env to a comma-separated list of allowed origins, or '*' for all.
 cors_origins = os.getenv('CORS_ORIGINS', '*')

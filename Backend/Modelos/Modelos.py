@@ -204,5 +204,40 @@ class Auditrail(db.Model):
             return {
                 'id':self.id,
                 'accion':self.accion,
+                'clave_docente':self.clave_docente,
+                'create_at':self.created_at,
+                'origin':self.origin
+            }
+
+
+class Docente(db.Model):
+    __tablename__='docente'
+    clave_docente = db.Column(db.Integer, primary_key = True, nullable=False)
+    nombre = db.Column(db.String(64), nullable=False)
+    apellido_paterno = db.Column(db.String(64), nullable=False)
+    apellido_materno = db.Column(db.String(64), nullable=False)
+    num_telefono = db.Column(db.String(18), nullable=False)
+    correo = db.Column(db.Text, nullable = False)
+
+    def to_dict(self):
+            return {
                 'clave_docente':self.clave_docente
             }
+
+
+
+class Inicio_Sesion(db.Model):
+    __tablename__='login'
+    id = db.Column(db.Integer, primary_key=True, nullable=False)
+    id_docente = db.Column(db.Integer, db.ForeignKey('docente.clave_docente'), nullable= False)
+    usuario = db.Column(db.Integer, nullable=False)
+    contrasena = db.Column(db.Text, nullable = False)
+    primera_vez = db.Column(db.Boolean,nullable=False)
+    
+    docente = db.relationship('Docente', backref='login')
+
+    def to_dict(self):
+        return{
+            'usuario':self.usuario
+        }
+
