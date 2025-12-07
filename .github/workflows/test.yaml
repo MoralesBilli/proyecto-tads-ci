@@ -2,15 +2,14 @@ name: CI Pipeline
 
 on:
   push:
-    branches: ["updates"]
+    branches:
+      - main
+      - update
   pull_request:
-    branches: ["updates"]
+    types: [opened, synchronize, reopened]
 
 permissions:
   contents: read
-
-pull_request:
-  types: [opened, synchronize, reopened]
 
 jobs:
   sonarqube:
