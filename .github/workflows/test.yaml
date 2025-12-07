@@ -18,7 +18,7 @@ jobs:
         with:
           fetch-depth: 0 # Shallow clones should be disabled for a better relevancy of analysis
       - name: SonarQube Scan
-        uses: SonarSource/sonarqube-scan-action@v6
+        uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
 
@@ -43,18 +43,6 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: SonarCloud Scan
-        uses: SonarSource/sonarcloud-github-action@v2
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-
-        with:
-          projectBaseDir: Backend
-          args: >
-            -Dsonar.projectKey=MoralesBilli_proyecto-tads-ci
-            -Dsonar.organization=moralesbilli
-            -Dsonar.python.version=3.12
-            -Dsonar.branch.name=updates
       - name: Ruff lint
         working-directory: Backend
         run: ruff check . || true
