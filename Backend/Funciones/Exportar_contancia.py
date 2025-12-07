@@ -5,7 +5,7 @@ from datetime import datetime
 from io import BytesIO
 import textwrap
 from Modelos.Modelos import Alumnos, Inscripciones, Calificaciones
-from Extensiones import db
+from Backend.Extensiones import db
 
 def generar_reporte_tutoria(no_control):
     # --- 1. Obtener datos del alumno ---

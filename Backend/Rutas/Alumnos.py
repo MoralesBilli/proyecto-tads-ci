@@ -1,4 +1,4 @@
-from Extensiones import db
+from Backend.Extensiones import db
 from Modelos.Modelos import Alumnos,FactoresDeRiesgo,FactoresPorAlumno,Inicio_Sesion,Inscripciones,Grupos,grupos_materias,Materias,Grupos
 from flask import jsonify, Blueprint, request
 from sqlalchemy.orm import joinedload

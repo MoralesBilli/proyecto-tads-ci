@@ -1,4 +1,4 @@
-from Extensiones import db
+from Backend.Extensiones import db
 from Modelos.Modelos import Auditrail
 from datetime import date
 def registrar_audi(origen,accion,clave,):

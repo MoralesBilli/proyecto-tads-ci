@@ -1,5 +1,5 @@
 import pandas as pd
-from Extensiones import db
+from Backend.Extensiones import db
 from Modelos.Modelos import Alumnos, Carreras, Calificaciones, Inscripciones, Grupos,Materias,Docente,grupos_materias
 import re
 from Funciones.Agregar_docente import crear_docente

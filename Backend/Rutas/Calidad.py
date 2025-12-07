@@ -1,4 +1,4 @@
-from Extensiones import db
+from Backend.Extensiones import db
 from flask import jsonify, Blueprint, request
 from Modelos.Modelos import Calificaciones,FactoresPorAlumno,Inicio_Sesion,Inscripciones,Alumnos
 from sqlalchemy import func

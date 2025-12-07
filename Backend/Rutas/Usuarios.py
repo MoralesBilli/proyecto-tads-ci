@@ -1,5 +1,5 @@
 from flask import Blueprint, request,jsonify
-from Extensiones import db
+from Backend.Extensiones import db
 from Funciones.Agregar_docente import crear_docente as crear_docente2
 Usuarios_bp = Blueprint('usuarios',__name__)
 

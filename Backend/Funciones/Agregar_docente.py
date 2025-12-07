@@ -1,5 +1,5 @@
 from Modelos.Modelos import Docente,Inicio_Sesion
-from Extensiones import db
+from Backend.Extensiones import db
 import bcrypt
 
 def crear_docente(clave_docente, nombre, apellido_paterno, apellido_materno, num_telefono, correo):

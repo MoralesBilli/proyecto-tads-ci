@@ -1,4 +1,4 @@
-from Extensiones import db
+from Backend.Extensiones import db
 from flask import Blueprint, jsonify,request,send_file
 from Funciones.ImportarExcel import importar_grupos,importar_calificaciones, importar_docentes
 from Modelos.Modelos import Grupos, Carreras,Materias, Inicio_Sesion

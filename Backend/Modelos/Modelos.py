@@ -1,4 +1,4 @@
-from Extensiones import db
+from Backend.Extensiones import db
 
 # --- Definición de Tipos ENUM ---
 modalidad_enum = db.Enum('PRESENCIAL', 'SEMIPRESENCIAL', name='modalidad')
