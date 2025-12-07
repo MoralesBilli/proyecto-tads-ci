@@ -1,6 +1,6 @@
 from flask import Flask
-from Extensiones import db
-from Rutas.Rutas import blueprints
+from Backend.Extensiones import db
+from Backend.Rutas.Rutas import blueprints
 from dotenv import load_dotenv
 import os
 from flask_cors import CORS
