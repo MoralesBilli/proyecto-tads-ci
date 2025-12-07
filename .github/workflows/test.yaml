@@ -30,12 +30,14 @@ jobs:
         run: |
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
-
+      - name: Ruff lint
+        working-directory: Backend
+        run: ruff check .
       - name: SonarCloud Scan
         uses: SonarSource/sonarcloud-github-action@v2
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
         with:
           projectBaseDir: Backend
           args: >
@@ -43,10 +45,6 @@ jobs:
             -Dsonar.organization=moralesbilli
             -Dsonar.python.version=3.12
             -Dsonar.branch.name=updates
-
-      - name: Ruff lint
-        working-directory: Backend
-        run: ruff check .
 
       - name: Test with pytest
         working-directory: .
@@ -65,7 +63,7 @@ jobs:
           node-version: "20"
 
       - name: Install Node dependencies
-        run: npm install --prefix frontend
+        run: npm install --prefix frontend --legacy-peer-deps
 
       - name: Lint Angular
         run: npm run lint --prefix frontend
