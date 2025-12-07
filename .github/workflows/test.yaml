@@ -31,10 +31,6 @@ jobs:
           flake8 . --count --select=E9,F63,F7,F82 --show-source --statistics
           flake8 . --count --exit-zero --max-complexity=10 --max-line-length=127 --statistics
 
-      - name: Ruff lint
-        working-directory: Backend
-        run: ruff check .
-
       - name: Test with pytest
         working-directory: Backend
         run: pytest
@@ -50,6 +46,11 @@ jobs:
             -Dsonar.projectKey=MoralesBilli_proyecto-tads-ci
             -Dsonar.organization=moralesbilli
             -Dsonar.python.version=3.12
+            -Dsonar.branch.name=updates
+
+      - name: Ruff lint
+        working-directory: Backend
+        run: ruff check .
 
   frontend:
     name: Frontend (Angular)
