@@ -1,21 +1,14 @@
-# This workflow will install Python dependencies, run tests and lint with a single version of Python
-# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-python
-
 name: primer test
-
 on:
   push:
     branches: ["updates"]
   pull_request:
     branches: ["updates"]
-
 permissions:
   contents: read
-
 jobs:
-  build:
+  backend:
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v4
       - name: Set up Python 3.12
@@ -36,6 +29,59 @@ jobs:
       - name: check linting
         working-directory: Backend
         run: ruff check .
-      - name: Test with pytest
-        working-directory: Backend
-        run: pytest
+      - name: SonarCloud Scan
+        uses: SonarSource/sonarcloud-github-action@v2
+        with:
+          projectBaseDir: .
+          args: >
+            -Dsonar.projectKey=TU_PROYECTO_KEY
+            -Dsonar.organization=TU_ORG
+            -Dsonar.python.version=3.12
+
+            - name: Test with pytest
+              working-directory: Backend
+              run: pytest
+
+  frontend:
+    name: Frontend (Angular)
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+
+      - name: Install Node dependencies
+        run: npm install --prefix frontend
+
+      - name: Lint Angular
+        run: npm run lint --prefix frontend
+
+      - name: Build Angular
+        run: npm run build --prefix frontend
+
+      - name: check linting
+        working-directory: frontend
+        run: ruff check .
+  sonar:
+    sonarqube:
+      name: SonarQube
+      runs-on: ubuntu-latest
+      steps:
+        - uses: actions/checkout@v4
+          with:
+            fetch-depth: 0
+        - name: SonarQube Scan
+          uses: SonarSource/sonarqube-scan-action@v2
+          with:
+            projectBaseDir: .
+            args: >
+              -Dsonar.projectKey=MoralesBilli_proyecto-tads-ci
+              -Dsonar.organization=moralesbilli
+              -Dsonar.python.version=3.12
+          env:
+            SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+            GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
